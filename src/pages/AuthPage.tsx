@@ -18,7 +18,7 @@ export function AuthPage() {
           <h1>SEU <span>DIÁRIO</span><br />CINEMATOGRÁFICO</h1>
           <p>Registre, avalie e organize tudo que você assiste num só lugar. Filmes, séries e mais.</p>
         </div>
-        <p style={{ color: '#5C5854', fontSize: 13 }}>© 2024 CineLog. Feito com ♥</p>
+        <p style={{ color: '#5C5854', fontSize: 13 }}>© 2026 CineLog.</p>
       </div>
 
       <div className="auth-right" style={{ position: 'relative' }}>

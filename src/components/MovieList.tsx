@@ -5,7 +5,7 @@ import { EditModal } from './EditModal';
 import type { MediaItem, WatchStatus, MediaType } from '../types';
 
 export function MovieList() {
-  const { items, updateItem, deleteItem } = useMedia();
+  const { items, loading, error, deleteItem } = useMedia();
   const [statusFilter, setStatusFilter] = useState<'all' | WatchStatus>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | MediaType>('all');
   const [search, setSearch] = useState('');
@@ -17,6 +17,26 @@ export function MovieList() {
     if (search && !i.title.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
+
+  if (loading) {
+    return (
+      <div className="empty-state">
+        <div className="emoji">⏳</div>
+        <h3>CARREGANDO...</h3>
+        <p>Buscando seus títulos no banco de dados.</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="empty-state">
+        <div className="emoji">⚠️</div>
+        <h3>ERRO AO CARREGAR</h3>
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -31,9 +51,7 @@ export function MovieList() {
             key={f.id}
             className={`filter-chip ${statusFilter === f.id ? 'active' : ''}`}
             onClick={() => setStatusFilter(f.id)}
-          >
-            {f.label}
-          </button>
+          >{f.label}</button>
         ))}
 
         {([
@@ -45,9 +63,7 @@ export function MovieList() {
             key={f.id}
             className={`filter-chip ${typeFilter === f.id ? 'active' : ''}`}
             onClick={() => setTypeFilter(f.id)}
-          >
-            {f.label}
-          </button>
+          >{f.label}</button>
         ))}
 
         <div className="search-input-wrap">
@@ -80,11 +96,7 @@ export function MovieList() {
       </div>
 
       {editItem && (
-        <EditModal
-          item={editItem}
-          onClose={() => setEditItem(null)}
-          onSave={updated => { updateItem(updated); setEditItem(null); }}
-        />
+        <EditModal item={editItem} onClose={() => setEditItem(null)} />
       )}
     </>
   );

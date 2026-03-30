@@ -2,16 +2,46 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export function RegisterForm() {
-  const { register, setScreen } = useAuth();
+  const { signUp, setScreen } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
-  const handleSubmit = () => {
-    const err = register(name, email, password);
-    if (err) setError(err);
+  const handleSubmit = async () => {
+    setLoading(true);
+    const err = await signUp(email, password, name);
+    setLoading(false);
+    if (err) {
+      setError(err);
+    } else {
+      // Supabase envia e-mail de confirmação por padrão
+      // Se desativado no dashboard, o login ocorre automaticamente
+      setSuccess(true);
+    }
   };
+
+  if (success) {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>📧</div>
+        <h2>VERIFIQUE SEU E-MAIL</h2>
+        <p style={{ marginTop: 12, lineHeight: 1.7 }}>
+          Enviamos um link de confirmação para <strong>{email}</strong>.
+          Clique no link e depois faça o login.
+        </p>
+        <button
+          className="btn-primary"
+          style={{ marginTop: 24 }}
+          onClick={() => { setScreen('login'); setSuccess(false); }}
+        >
+          Ir para o Login
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -44,7 +74,7 @@ export function RegisterForm() {
         <input
           className="form-input"
           type="password"
-          placeholder="••••••••"
+          placeholder="mínimo 6 caracteres"
           value={password}
           onChange={e => setPassword(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSubmit()}
@@ -53,7 +83,9 @@ export function RegisterForm() {
 
       {error && <p style={{ color: '#E24B4A', fontSize: 13, marginBottom: 8 }}>{error}</p>}
 
-      <button className="btn-primary" onClick={handleSubmit}>Criar Conta</button>
+      <button className="btn-primary" onClick={handleSubmit} disabled={loading}>
+        {loading ? 'Criando conta...' : 'Criar Conta'}
+      </button>
 
       <div className="auth-switch">
         Já tem conta?{' '}

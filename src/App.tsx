@@ -6,8 +6,21 @@ import { Dashboard } from './pages/Dashboard';
 import './App.css';
 
 function AppContent() {
-  const { screen } = useAuth();
+  const { screen, loading } = useAuth();
   const { theme } = useTheme();
+
+  if (loading) {
+    return (
+      <div
+        className={`app-root ${theme}`}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}
+      >
+        <p style={{ color: 'var(--txt-secondary)', fontFamily: 'var(--ff-display)', fontSize: 24, letterSpacing: 2 }}>
+          CARREGANDO...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className={`app-root ${theme}`}>

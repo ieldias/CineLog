@@ -3,20 +3,16 @@ export type WatchStatus = 'watched' | 'watching' | 'wishlist';
 
 export interface MediaItem {
   id: number;
+  user_id: string;
   title: string;
   type: MediaType;
   status: WatchStatus;
   genre: string;
-  rating: number; // 0-5
+  rating: number;
   note: string;
-  date: string;
+  created_at: string;
 }
 
-export interface User {
-  name: string;
-  email: string;
-  password: string;
-}
+export type NewMediaItem = Omit<MediaItem, 'id' | 'user_id' | 'created_at'>;
 
 export type Theme = 'dark' | 'light';
-export type Screen = 'login' | 'register' | 'dashboard';

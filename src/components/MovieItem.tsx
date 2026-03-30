@@ -10,6 +10,9 @@ interface MovieItemProps {
 
 export function MovieItem({ item, onDelete, onEdit }: MovieItemProps) {
   const status = STATUS_CONFIG[item.status];
+  const date = new Date(item.created_at).toLocaleDateString('pt-BR', {
+    day: '2-digit', month: 'short', year: 'numeric',
+  });
 
   return (
     <div className="movie-card">
@@ -28,7 +31,7 @@ export function MovieItem({ item, onDelete, onEdit }: MovieItemProps) {
       </div>
 
       <div className="movie-card-footer">
-        <span className="movie-date">{item.date}</span>
+        <span className="movie-date">{date}</span>
         <div className="card-actions">
           <button className="icon-btn" onClick={() => onEdit(item)} title="Editar">✏️</button>
           <button className="icon-btn delete" onClick={() => onDelete(item.id)} title="Excluir">🗑</button>

@@ -2,13 +2,16 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export function LoginForm() {
-  const { login, setScreen } = useAuth();
+  const { signIn, setScreen } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
-    const err = login(email, password);
+  const handleSubmit = async () => {
+    setLoading(true);
+    const err = await signIn(email, password);
+    setLoading(false);
     if (err) setError(err);
   };
 
@@ -42,11 +45,9 @@ export function LoginForm() {
 
       {error && <p style={{ color: '#E24B4A', fontSize: 13, marginBottom: 8 }}>{error}</p>}
 
-      <button className="btn-primary" onClick={handleSubmit}>Entrar</button>
-
-      <p style={{ fontSize: 12, color: 'var(--txt-muted)', marginTop: 10, textAlign: 'center' }}>
-        Demo: demo@cinelog.com / 123456
-      </p>
+      <button className="btn-primary" onClick={handleSubmit} disabled={loading}>
+        {loading ? 'Entrando...' : 'Entrar'}
+      </button>
 
       <div className="auth-switch">
         Não tem conta?{' '}

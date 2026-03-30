@@ -2,19 +2,25 @@ import { useState } from 'react';
 import { useMedia } from '../context/MediaContext';
 import { StarRating } from './StarRating';
 import { GENRES } from '../utils/constants';
-import type { MediaType, WatchStatus } from '../types';
+import type { MediaType, WatchStatus, NewMediaItem } from '../types';
 
-const DEFAULT = { title: '', type: 'movie' as MediaType, status: 'wishlist' as WatchStatus, genre: '', rating: 0, note: '' };
+const DEFAULT: NewMediaItem = {
+  title: '', type: 'movie', status: 'wishlist', genre: '', rating: 0, note: '',
+};
 
 export function MovieForm() {
   const { addItem } = useMedia();
-  const [form, setForm] = useState({ ...DEFAULT });
-  const set = <K extends keyof typeof DEFAULT>(k: K, v: (typeof DEFAULT)[K]) =>
+  const [form, setForm] = useState<NewMediaItem>({ ...DEFAULT });
+  const [loading, setLoading] = useState(false);
+
+  const set = <K extends keyof NewMediaItem>(k: K, v: NewMediaItem[K]) =>
     setForm(f => ({ ...f, [k]: v }));
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!form.title.trim()) return;
-    addItem(form);
+    setLoading(true);
+    await addItem(form);
+    setLoading(false);
     setForm({ ...DEFAULT });
   };
 
@@ -73,13 +79,13 @@ export function MovieForm() {
           <textarea
             className="form-textarea"
             rows={2}
-            placeholder="O que você achou? Vale a pena recomendar?"
+            placeholder="O que você achou?"
             value={form.note}
             onChange={e => set('note', e.target.value)}
           />
         </div>
-        <button className="btn-add" onClick={handleAdd} style={{ marginBottom: 1 }}>
-          ＋ Adicionar
+        <button className="btn-add" onClick={handleAdd} disabled={loading} style={{ marginBottom: 1 }}>
+          {loading ? '...' : '＋ Adicionar'}
         </button>
       </div>
     </div>

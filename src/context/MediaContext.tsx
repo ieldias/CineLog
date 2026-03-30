@@ -1,20 +1,15 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
-import type { MediaItem, WatchStatus, MediaType } from '../types';
-
-const DEMO_ITEMS: MediaItem[] = [
-  { id: 1, title: 'Dune: Parte Dois', type: 'movie', status: 'watched', genre: 'Sci-Fi', rating: 5, note: 'Épico visual e narrativo. Villeneuve entrega uma obra prima da ficção científica.', date: '15 Mar 2024' },
-  { id: 2, title: 'The Bear', type: 'series', status: 'watching', genre: 'Drama', rating: 4, note: 'Intensa e angustiante do jeito certo. O ritmo é impecável.', date: '10 Mar 2024' },
-  { id: 3, title: 'Oppenheimer', type: 'movie', status: 'watched', genre: 'Biografia', rating: 5, note: 'Nolan no seu melhor. A montagem é cirúrgica e o elenco impecável.', date: '01 Mar 2024' },
-  { id: 4, title: 'Shogun', type: 'series', status: 'watching', genre: 'Drama', rating: 4, note: 'Produção belíssima. O Japão feudal nunca pareceu tão real.', date: '08 Mar 2024' },
-  { id: 5, title: 'Alien: Romulus', type: 'movie', status: 'wishlist', genre: 'Terror', rating: 0, note: '', date: '12 Mar 2024' },
-  { id: 6, title: 'Severance', type: 'series', status: 'wishlist', genre: 'Thriller', rating: 0, note: '', date: '05 Mar 2024' },
-];
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '../lib/supabase';
+import { useAuth } from './AuthContext';
+import type { MediaItem, NewMediaItem } from '../types';
 
 interface MediaContextValue {
   items: MediaItem[];
-  addItem: (item: Omit<MediaItem, 'id' | 'date'>) => void;
-  updateItem: (item: MediaItem) => void;
-  deleteItem: (id: number) => void;
+  loading: boolean;
+  error: string | null;
+  addItem: (item: NewMediaItem) => Promise<void>;
+  updateItem: (id: number, item: Partial<NewMediaItem>) => Promise<void>;
+  deleteItem: (id: number) => Promise<void>;
   counts: {
     all: number;
     watched: number;
@@ -29,21 +24,91 @@ interface MediaContextValue {
 const MediaContext = createContext<MediaContextValue>({} as MediaContextValue);
 
 export function MediaProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<MediaItem[]>(DEMO_ITEMS);
-  const [nextId, setNextId] = useState(10);
+  const { user } = useAuth();
+  const [items, setItems] = useState<MediaItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const addItem = (item: Omit<MediaItem, 'id' | 'date'>) => {
-    const today = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
-    setItems(prev => [{ ...item, id: nextId, date: today }, ...prev]);
-    setNextId(n => n + 1);
+  // Busca todos os itens do usuário logado
+  const fetchItems = async () => {
+    if (!user) return;
+    setLoading(true);
+    setError(null);
+
+    const { data, error } = await supabase
+      .from('media_items')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      setError('Erro ao carregar dados: ' + error.message);
+    } else {
+      setItems(data as MediaItem[]);
+    }
+    setLoading(false);
   };
 
-  const updateItem = (updated: MediaItem) => {
-    setItems(prev => prev.map(i => i.id === updated.id ? updated : i));
+  // Busca os dados sempre que o usuário mudar
+  useEffect(() => {
+    if (user) {
+      fetchItems();
+    } else {
+      setItems([]);
+    }
+  }, [user]);
+
+  const addItem = async (item: NewMediaItem) => {
+    if (!user) return;
+    setError(null);
+
+    const { data, error } = await supabase
+      .from('media_items')
+      .insert({ ...item, user_id: user.id })
+      .select()
+      .single();
+
+    if (error) {
+      setError('Erro ao adicionar: ' + error.message);
+    } else {
+      setItems(prev => [data as MediaItem, ...prev]);
+    }
   };
 
-  const deleteItem = (id: number) => {
-    setItems(prev => prev.filter(i => i.id !== id));
+  const updateItem = async (id: number, item: Partial<NewMediaItem>) => {
+    if (!user) return;
+    setError(null);
+
+    const { data, error } = await supabase
+      .from('media_items')
+      .update(item)
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single();
+
+    if (error) {
+      setError('Erro ao atualizar: ' + error.message);
+    } else {
+      setItems(prev => prev.map(i => i.id === id ? data as MediaItem : i));
+    }
+  };
+
+  const deleteItem = async (id: number) => {
+    if (!user) return;
+    setError(null);
+
+    const { error } = await supabase
+      .from('media_items')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id);
+
+    if (error) {
+      setError('Erro ao excluir: ' + error.message);
+    } else {
+      setItems(prev => prev.filter(i => i.id !== id));
+    }
   };
 
   const counts = {
@@ -61,7 +126,7 @@ export function MediaProvider({ children }: { children: ReactNode }) {
     : '—';
 
   return (
-    <MediaContext.Provider value={{ items, addItem, updateItem, deleteItem, counts, avgRating }}>
+    <MediaContext.Provider value={{ items, loading, error, addItem, updateItem, deleteItem, counts, avgRating }}>
       {children}
     </MediaContext.Provider>
   );

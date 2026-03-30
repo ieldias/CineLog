@@ -1,3 +1,4 @@
+// StarRating.tsx
 import { useState } from 'react';
 
 interface StarRatingProps {
@@ -9,7 +10,6 @@ interface StarRatingProps {
 
 export function StarRating({ value, onChange, readOnly = false, size = 22 }: StarRatingProps) {
   const [hover, setHover] = useState(0);
-
   return (
     <div style={{ display: 'flex', gap: 2 }}>
       {[1, 2, 3, 4, 5].map(s => (

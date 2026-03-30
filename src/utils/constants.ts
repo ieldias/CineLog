@@ -5,7 +5,7 @@ export const GENRES = [
 ];
 
 export const STATUS_CONFIG = {
-  watched: { label: 'Assistido', cls: 'status-watched' },
-  watching: { label: 'Assistindo', cls: 'status-watching' },
+  watched:  { label: 'Assistido',   cls: 'status-watched'  },
+  watching: { label: 'Assistindo',  cls: 'status-watching' },
   wishlist: { label: 'Vou Assistir', cls: 'status-wishlist' },
 } as const;

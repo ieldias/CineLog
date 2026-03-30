@@ -7,7 +7,6 @@ import { MovieList } from '../components/MovieList';
 
 export function Dashboard() {
   const [activeNav, setActiveNav] = useState('dashboard');
-
   return (
     <div className="dashboard">
       <Sidebar activeNav={activeNav} onNavChange={setActiveNav} />

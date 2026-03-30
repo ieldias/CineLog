@@ -1,18 +1,35 @@
 import { useState } from 'react';
+import { useMedia } from '../context/MediaContext';
 import { StarRating } from './StarRating';
 import { GENRES } from '../utils/constants';
-import type { MediaItem, MediaType, WatchStatus } from '../types';
+import type { MediaItem, MediaType, WatchStatus, NewMediaItem } from '../types';
 
 interface EditModalProps {
   item: MediaItem;
   onClose: () => void;
-  onSave: (item: MediaItem) => void;
 }
 
-export function EditModal({ item, onClose, onSave }: EditModalProps) {
-  const [form, setForm] = useState<MediaItem>({ ...item });
-  const set = <K extends keyof MediaItem>(k: K, v: MediaItem[K]) =>
+export function EditModal({ item, onClose }: EditModalProps) {
+  const { updateItem } = useMedia();
+  const [form, setForm] = useState<NewMediaItem>({
+    title: item.title,
+    type: item.type,
+    status: item.status,
+    genre: item.genre,
+    rating: item.rating,
+    note: item.note,
+  });
+  const [loading, setLoading] = useState(false);
+
+  const set = <K extends keyof NewMediaItem>(k: K, v: NewMediaItem[K]) =>
     setForm(f => ({ ...f, [k]: v }));
+
+  const handleSave = async () => {
+    setLoading(true);
+    await updateItem(item.id, form);
+    setLoading(false);
+    onClose();
+  };
 
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
@@ -72,8 +89,10 @@ export function EditModal({ item, onClose, onSave }: EditModalProps) {
         </div>
 
         <div className="modal-footer">
-          <button className="btn-ghost" onClick={onClose}>Cancelar</button>
-          <button className="btn-add" onClick={() => onSave(form)}>Salvar</button>
+          <button className="btn-ghost" onClick={onClose} disabled={loading}>Cancelar</button>
+          <button className="btn-add" onClick={handleSave} disabled={loading}>
+            {loading ? 'Salvando...' : 'Salvar'}
+          </button>
         </div>
       </div>
     </div>
