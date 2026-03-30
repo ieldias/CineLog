@@ -1,0 +1,39 @@
+name: CI Pipeline - CineBook SaaS
+
+# Executa o workflow em qualquer push
+on:
+  push:
+    branches:
+      - main
+      - '**' # qualquer branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Clonar o repositório
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Configurar Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '24'
+
+      # 3️⃣ Instalar dependências
+      - name: Install dependencies
+        run: npm install
+
+      # 4️⃣ Exibir mensagem no console
+      - name: Show message
+        run: echo "🚀 Iniciando CI para CineNote!"
+
+      # 5️⃣ Rodar build do projeto React
+      - name: Run build
+        run: npm run build
+
+      # 6️⃣ Listar arquivos do diretório de build
+      - name: List build files
+        run: ls -R dist
