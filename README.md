@@ -1,4 +1,4 @@
-# 🎬 CineNote
+# 🎬 CineLog
 
 > Sistema de controle de filmes e séries com autenticação, banco de dados em nuvem e pipeline de CI/CD automatizado.
 
@@ -6,7 +6,7 @@
 
 ## Objetivo da Solução
 
-O CineNote é uma aplicação SaaS desenvolvida em React que permite ao usuário registrar, organizar e avaliar filmes e séries assistidos. Cada usuário possui uma conta própria com dados isolados no banco de dados, podendo cadastrar títulos com status de visualização, nota de 1 a 5 estrelas e comentários pessoais.
+O CineLog é uma aplicação SaaS desenvolvida em React que permite ao usuário registrar, organizar e avaliar filmes e séries assistidos. Cada usuário possui uma conta própria com dados isolados no banco de dados, podendo cadastrar títulos com status de visualização, nota de 1 a 5 estrelas e comentários pessoais.
 
 ---
 
@@ -27,40 +27,46 @@ O arquivo `.github/workflows/ci.yml` define o pipeline de integração contínua
 ```yaml
 name: CI — Build e Validação
 
+# Executa o workflow em qualquer push
 on:
   push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
+    branches:
+      - main
+      - '**' # qualquer branch
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout do repositório
-        uses: actions/checkout@v4
+      # 1️⃣ Clonar o repositório
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Configurar Node.js
-        uses: actions/setup-node@v4
+      # 2️⃣ Configurar Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: '24'
 
-      - name: Instalar dependências
-        run: npm ci
+      # 3️⃣ Instalar dependências
+      - name: Install dependencies
+        run: npm install
 
-      - name: Criar arquivo .env para o build
-        run: |
-          echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" >> .env
-          echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> .env
+      # 4️⃣ Exibir mensagem no console
+      - name: Show message
+        run: echo "🚀 Iniciando CI para CineNote!"
 
-      - name: Executar build de produção
+      # 5️⃣ Rodar build do projeto React
+      - name: Run build
         run: npm run build
 
-      - name: Verificar artefatos gerados
-        run: ls -lh dist/
+      # 6️⃣ Listar arquivos do diretório de build
+      - name: List build files
+        run: ls -R dist
 ```
+
+---
 
 ### Gatilhos do workflow
 
@@ -68,64 +74,6 @@ jobs:
 |---|---|---|
 | `push` | `main` ou `develop` | Executa o pipeline completo |
 | `pull_request` | `main` | Valida o build antes do merge |
-
-### Secrets necessários no GitHub
-
-Configure em **Settings → Secrets and variables → Actions**:
-
-| Secret | Valor |
-|---|---|
-| `VITE_SUPABASE_URL` | URL do projeto Supabase |
-| `VITE_SUPABASE_ANON_KEY` | Chave pública anon do Supabase |
-
----
-
-## Explicação do Pipeline
-
-O pipeline é composto por uma única job (`build`) com seis etapas sequenciais. Se qualquer etapa falhar, as seguintes são canceladas e o pipeline é marcado como falho — impedindo que código quebrado seja mergeado.
-
-### Etapa 1 — Checkout
-```yaml
-uses: actions/checkout@v4
-```
-Clona o repositório dentro do runner (máquina virtual Ubuntu fornecida pelo GitHub). Sem esta etapa, nenhum arquivo do projeto estaria disponível para as etapas seguintes.
-
-### Etapa 2 — Configurar Node.js
-```yaml
-uses: actions/setup-node@v4
-with:
-  node-version: 20
-  cache: 'npm'
-```
-Instala o Node.js 20 LTS no runner e ativa o cache do npm. O cache armazena a pasta `node_modules` entre execuções, reduzindo o tempo de instalação de dependências em pipelines subsequentes.
-
-### Etapa 3 — Instalar dependências
-```yaml
-run: npm ci
-```
-Usa `npm ci` em vez de `npm install`. A diferença é importante: `npm ci` instala exatamente as versões travadas no `package-lock.json`, garantindo um ambiente reproduzível e idêntico em toda execução do pipeline.
-
-### Etapa 4 — Criar arquivo .env
-```yaml
-run: |
-  echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" >> .env
-  echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> .env
-```
-Injeta as variáveis de ambiente a partir dos Secrets do GitHub. O Vite precisa dessas variáveis em tempo de build para substituir as referências a `import.meta.env.VITE_*` nos arquivos compilados. Os valores nunca ficam expostos nos logs do pipeline.
-
-### Etapa 5 — Build de produção
-```yaml
-run: npm run build
-```
-Executa `tsc -b && vite build`, que faz duas coisas em sequência:
-1. **`tsc -b`** — compila o TypeScript e valida todos os tipos. Se houver erro de tipo, o pipeline falha aqui com o erro exato apontado.
-2. **`vite build`** — empacota a aplicação para produção na pasta `dist/`, com minificação, tree-shaking e otimização de assets.
-
-### Etapa 6 — Verificar artefatos
-```yaml
-run: ls -lh dist/
-```
-Lista os arquivos gerados na pasta `dist/` com seus tamanhos. Serve como confirmação visual de que os artefatos foram criados corretamente e permite monitorar o crescimento do bundle ao longo do tempo.
 
 ---
 
@@ -144,7 +92,7 @@ Desenvolvedor faz push ou abre PR
 │  1. Checkout do código          ✓   │
 │              │                      │
 │              ▼                      │
-│  2. Setup Node.js 20 + cache    ✓   │
+│  2. Setup Node.js 24 + cache    ✓   │
 │              │                      │
 │              ▼                      │
 │  3. npm ci (instala deps)       ✓   │
@@ -181,7 +129,7 @@ cd cine-note
 npm install
 
 # 3. Configurar variáveis de ambiente
-cp .env.example .env
+ni .env
 # Edite o .env com suas credenciais do Supabase
 
 # 4. Rodar em desenvolvimento
