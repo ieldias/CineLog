@@ -16,25 +16,35 @@ export function MovieItem({ item, onDelete, onEdit }: MovieItemProps) {
 
   return (
     <div className="movie-card">
-      <div className="movie-card-header">
-        <span className={`status-badge ${status.cls}`}>{status.label}</span>
-        <div className={`movie-type-badge ${item.type === 'movie' ? 'badge-movie' : 'badge-series'}`}>
-          {item.type === 'movie' ? '🎬 Filme' : '📺 Série'}
+      {/* Pôster do TMDB */}
+      <div className="movie-card-poster">
+        {item.poster_url
+          ? <img src={item.poster_url} alt={item.title} />
+          : <div className="movie-card-noposter">🎬</div>
+        }
+        <span className={`status-badge-poster ${status.cls}`}>{status.label}</span>
+      </div>
+
+      <div className="movie-card-content">
+        <div className="movie-card-header">
+          <div className={`movie-type-badge ${item.type === 'movie' ? 'badge-movie' : 'badge-series'}`}>
+            {item.type === 'movie' ? '🎬 Filme' : '📺 Série'}
+          </div>
+          <div className="movie-title">{item.title}</div>
+          {item.genre && <div className="movie-genre">{item.genre}</div>}
         </div>
-        <div className="movie-title">{item.title}</div>
-        {item.genre && <div className="movie-genre">{item.genre}</div>}
-      </div>
 
-      <div className="movie-card-body">
-        <StarRating value={item.rating} onChange={() => {}} readOnly size={16} />
-        {item.note && <p className="movie-note">{item.note}</p>}
-      </div>
+        <div className="movie-card-body">
+          <StarRating value={item.rating} onChange={() => {}} readOnly size={15} />
+          {item.note && <p className="movie-note">{item.note}</p>}
+        </div>
 
-      <div className="movie-card-footer">
-        <span className="movie-date">{date}</span>
-        <div className="card-actions">
-          <button className="icon-btn" onClick={() => onEdit(item)} title="Editar">✏️</button>
-          <button className="icon-btn delete" onClick={() => onDelete(item.id)} title="Excluir">🗑</button>
+        <div className="movie-card-footer">
+          <span className="movie-date">{date}</span>
+          <div className="card-actions">
+            <button className="icon-btn" onClick={() => onEdit(item)} title="Editar">✏️</button>
+            <button className="icon-btn delete" onClick={() => onDelete(item.id)} title="Excluir">🗑</button>
+          </div>
         </div>
       </div>
     </div>

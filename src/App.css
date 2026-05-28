@@ -760,3 +760,262 @@ body { font-family: var(--ff-body); }
   .add-grid { grid-template-columns: 1fr; }
   .stats-row { grid-template-columns: 1fr 1fr; }
 }
+
+/* ──────────────── TMDB SEARCH ──────────────── */
+.movie-search-wrap {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.movie-search-input-wrap {
+  position: relative;
+}
+
+.movie-search-spinner {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.movie-search-clear {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--txt-muted);
+  font-size: 14px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color var(--transition);
+}
+.movie-search-clear:hover { color: var(--txt-primary); }
+
+.movie-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 50;
+  overflow: hidden;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.movie-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition);
+  font-family: var(--ff-body);
+}
+.movie-dropdown-item:last-child { border-bottom: none; }
+.movie-dropdown-item:hover { background: var(--chip-bg); }
+
+.movie-dropdown-poster {
+  width: 40px;
+  height: 58px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--input-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.movie-dropdown-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.movie-dropdown-noposter {
+  font-size: 20px;
+  color: var(--txt-muted);
+}
+
+.movie-dropdown-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.movie-dropdown-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--txt-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.movie-dropdown-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.movie-dropdown-type {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.type-movie { background: rgba(59,130,246,0.12); color: #3B82F6; }
+.type-series { background: rgba(168,85,247,0.12); color: #A855F7; }
+
+.movie-dropdown-year {
+  font-size: 12px;
+  color: var(--txt-muted);
+}
+
+.movie-dropdown-genre {
+  font-size: 11px;
+  color: var(--txt-secondary);
+  background: var(--chip-bg);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+/* ──────────────── ADD FORM LAYOUT ──────────────── */
+.add-form-layout {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.add-poster-preview {
+  width: 120px;
+  height: 178px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--input-bg);
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.add-poster-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.add-poster-empty {
+  font-size: 36px;
+  color: var(--txt-muted);
+}
+
+.add-form-fields { min-width: 0; }
+
+.add-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.selected-title-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(16,185,129,0.08);
+  border: 1px solid rgba(16,185,129,0.2);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: #10B981;
+  margin-bottom: 14px;
+}
+.selected-title-tag strong {
+  color: var(--txt-primary);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.selected-title-tag button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--txt-muted);
+  font-size: 13px;
+  padding: 2px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.selected-title-tag button:hover { color: #E24B4A; }
+
+/* ──────────────── MOVIE CARD COM POSTER ──────────────── */
+.movie-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.movie-card-poster {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  background: var(--input-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.movie-card-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+.movie-card:hover .movie-card-poster img {
+  transform: scale(1.04);
+}
+.movie-card-noposter {
+  font-size: 48px;
+  color: var(--txt-muted);
+}
+
+.status-badge-poster {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 600;
+  backdrop-filter: blur(6px);
+}
+
+.movie-card-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .add-form-layout { grid-template-columns: 1fr; }
+  .add-poster-preview { width: 80px; height: 120px; }
+  .add-grid-3 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px) {
+  .add-grid-3 { grid-template-columns: 1fr; }
+}
