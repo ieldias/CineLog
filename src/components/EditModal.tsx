@@ -18,6 +18,8 @@ export function EditModal({ item, onClose }: EditModalProps) {
     genre: item.genre,
     rating: item.rating,
     note: item.note,
+    poster_url: item.poster_url ?? '',
+    tmdb_id:    item.tmdb_id   ?? null,
   });
   const [loading, setLoading] = useState(false);
 
