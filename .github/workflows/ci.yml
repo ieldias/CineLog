@@ -1,39 +1,95 @@
-name: CI Pipeline - CineBook SaaS
+name: CI/CD — Build, Validação e Docker
 
-# Executa o workflow em qualquer push
 on:
   push:
-    branches:
-      - main
-      - '**' # qualquer branch
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
 
 jobs:
+  # ── JOB 1: Build e validação TypeScript ──
   build:
+    name: Build e Validação
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Clonar o repositório
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
 
-      # 2️⃣ Configurar Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: 20
+          cache: 'npm'
 
-      # 3️⃣ Instalar dependências
-      - name: Install dependencies
-        run: npm install
+      - name: Instalar dependências
+        run: npm ci
 
-      # 4️⃣ Exibir mensagem no console
-      - name: Show message
-        run: echo "🚀 Iniciando CI para CineNote!"
+      - name: Criar arquivo .env para o build
+        run: |
+          echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" >> .env
+          echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> .env
+          echo "VITE_TMDB_API_KEY=${{ secrets.VITE_TMDB_API_KEY }}" >> .env
 
-      # 5️⃣ Rodar build do projeto React
-      - name: Run build
+      - name: Executar build de produção (tsc + vite)
         run: npm run build
 
-      # 6️⃣ Listar arquivos do diretório de build
-      - name: List build files
-        run: ls -R dist
+      - name: Verificar artefatos gerados
+        run: ls -lh dist/
+
+      # Salva os artefatos para o job de Docker usar
+      - name: Upload dos artefatos de build
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  # ── JOB 2: Build e Push da imagem Docker ──
+  docker:
+    name: Docker Build e Push
+    runs-on: ubuntu-latest
+    needs: build          # só roda se o build passar
+    if: github.ref == 'refs/heads/main'   # só na branch main
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Download dos artefatos de build
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Login no Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extrair metadados da imagem
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/cinelog
+          tags: |
+            type=raw,value=v2
+            type=raw,value=latest
+            type=sha,prefix=sha-
+
+      - name: Build e Push da imagem Docker
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
+            VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}
+            VITE_TMDB_API_KEY=${{ secrets.VITE_TMDB_API_KEY }}
+
+      - name: Resumo do deploy
+        run: |
+          echo "✅ Imagem publicada com sucesso!"
+          echo "🐳 Tags: ${{ steps.meta.outputs.tags }}"
+          echo "🔗 https://hub.docker.com/r/${{ secrets.DOCKERHUB_USERNAME }}/cinelog"
